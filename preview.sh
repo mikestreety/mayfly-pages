@@ -5,7 +5,18 @@
 # Run from your TYPO3 project root (the directory containing .ddev/).
 #
 # Usage:
-#   preview.sh [deploy|stop|seed]
+#   preview.sh [deploy|stop|import-db|export-db]
+#
+#   deploy      — rsync and configure the preview environment
+#   stop        — tear down the preview environment
+#   import-db   — import a SQL dump into the preview database
+#                   cat database.sql | preview.sh import-db
+#                   zcat database.sql.gz | preview.sh import-db
+#                   DB_FILE=database.sql preview.sh import-db
+#                   DB_FILE=database.sql.gz preview.sh import-db
+#   export-db   — dump the preview database to stdout (or DB_FILE)
+#                   preview.sh export-db > database.sql
+#                   DB_FILE=database.sql preview.sh export-db
 #
 # Auto-detects:
 #   - Project name    from .ddev/config.yaml
@@ -17,7 +28,7 @@
 #   PREVIEW_SERVER_USER   default: deploy
 #   PREVIEW_DOMAIN        default: mayfly.live
 #   SSH_KEY_FILE          path to private key (overrides auto-detect)
-#   DB_FILE               path to .sql or .sql.gz dump (seed only)
+#   DB_FILE               path to .sql dump (import-db and export-db)
 # ---------------------------------------------------------------------------
 
 set -euo pipefail
@@ -27,9 +38,9 @@ IMAGE="ghcr.io/mikestreety/ddev-hosted:latest"
 
 # ── validate command ─────────────────────────────────────────────────────────
 case "$COMMAND" in
-  deploy|stop|seed) ;;
+  deploy|stop|import-db|export-db) ;;
   *)
-    echo "Usage: $0 [deploy|stop|seed]" >&2
+    echo "Usage: $0 [deploy|stop|import-db|export-db]" >&2
     exit 1
     ;;
 esac
@@ -79,22 +90,86 @@ echo "[preview] Server:   ${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}"
 echo "[preview] Domain:   ${PREVIEW_DOMAIN}"
 echo "[preview] SSH key:  ${SSH_KEY_FILE}"
 
-# ── DB_FILE for seed ─────────────────────────────────────────────────────────
-EXTRA_ARGS=()
-if [ "$COMMAND" = "seed" ]; then
-  DB_FILE=${DB_FILE:?"DB_FILE is required for seed (path to your .sql or .sql.gz dump)"}
-  DB_ABS=$(realpath "$DB_FILE")
-  DB_BASENAME=$(basename "$DB_FILE")
-  EXTRA_ARGS=(
-    -v "${DB_ABS}:/tmp/seed/${DB_BASENAME}"
-    -e "DB_FILE=/tmp/seed/${DB_BASENAME}"
-  )
+# ── helpers for import-db / export-db ────────────────────────────────────────
+
+# resolve_slug — populates $SLUG via one SSH round-trip for PREVIEW_USER.
+# Mirrors lib.sh:compute_slug — keep in sync if that function changes.
+resolve_slug() {
+  PREVIEW_USER=$(ssh -i "$SSH_KEY_FILE" \
+    "${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}" 'whoami')
+  local _name _hash _suffix _maxname
+  _name=$(printf '%s' "$CI_PROJECT_NAME" \
+    | tr '[:upper:]' '[:lower:]' \
+    | tr ' _' '-' \
+    | tr -cs 'a-z0-9-' '-' \
+    | sed 's/^-//;s/-$//')
+  _hash=$(printf '%s' "$CI_COMMIT_REF_NAME" | sha256sum | cut -c1-10)
+  _suffix="-${_hash}.${PREVIEW_USER}.${PREVIEW_DOMAIN}"
+  _maxname=$(( 253 - ${#_suffix} ))
+  (( _maxname > 30 )) && _maxname=30
+  _name="${_name:0:${_maxname}}"
+  _name=$(printf '%s' "$_name" | sed 's/-*$//')
+  SLUG="${_name}-${_hash}"
+}
+
+# ── import-db — direct SSH, no Docker ────────────────────────────────────────
+if [ "$COMMAND" = "import-db" ]; then
+
+  if [ -n "${DB_FILE:-}" ]; then
+    if [ ! -s "$DB_FILE" ]; then
+      echo "[preview] ERROR: DB_FILE '${DB_FILE}' is empty or does not exist" >&2
+      exit 1
+    fi
+    case "$DB_FILE" in
+      *.sql.gz) exec 0< <(gunzip -c "$DB_FILE") ;;
+      *.sql)    exec 0< "$DB_FILE" ;;
+      *)
+        echo "[preview] ERROR: DB_FILE must have a .sql or .sql.gz extension" >&2
+        exit 1
+        ;;
+    esac
+    echo "[preview] DB_FILE:   ${DB_FILE}"
+  elif [ -t 0 ]; then
+    echo "[preview] ERROR: import-db requires SQL on stdin — pipe a dump file or set DB_FILE" >&2
+    echo "[preview]   e.g.: cat database.sql | $0 import-db" >&2
+    echo "[preview]         DB_FILE=database.sql $0 import-db" >&2
+    exit 1
+  fi
+
+  resolve_slug
+  echo "[preview] Slug:     ${SLUG}"
+  echo "[preview] Importing database..."
+
+  ssh -i "$SSH_KEY_FILE" \
+    "${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}" \
+    "bash /opt/preview-scripts/import-preview-db.sh '${SLUG}'"
+  exit 0
 fi
 
+# ── export-db — direct SSH, no Docker ────────────────────────────────────────
+if [ "$COMMAND" = "export-db" ]; then
+
+  resolve_slug
+  echo "[preview] Slug:     ${SLUG}" >&2
+  echo "[preview] Exporting database..." >&2
+
+  if [ -n "${DB_FILE:-}" ]; then
+    echo "[preview] Writing to ${DB_FILE}" >&2
+    ssh -i "$SSH_KEY_FILE" \
+      "${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}" \
+      "bash /opt/preview-scripts/export-preview-db.sh '${SLUG}'" > "$DB_FILE"
+  else
+    ssh -i "$SSH_KEY_FILE" \
+      "${PREVIEW_SERVER_USER}@${PREVIEW_SERVER_HOST}" \
+      "bash /opt/preview-scripts/export-preview-db.sh '${SLUG}'"
+  fi
+  exit 0
+fi
+
+# ── deploy / stop via Docker ──────────────────────────────────────────────────
 docker run --rm \
   -v "$(pwd):/workspace" \
   -w /workspace \
-  "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}" \
   -e "SSH_PRIVATE_KEY=$(cat "$SSH_KEY_FILE")" \
   -e "PREVIEW_SERVER_HOST=${PREVIEW_SERVER_HOST}" \
   -e "PREVIEW_SERVER_USER=${PREVIEW_SERVER_USER}" \
