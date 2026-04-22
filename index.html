@@ -594,7 +594,7 @@
     <!-- Code block -->
     <div class="code-wrap">
       <div class="code-block">
-        <span class="prompt">$</span><code>bash &lt;(curl -fsSL get.mayfly.live/preview.sh)</code>
+        <span class="prompt">$</span><code>bash &lt;(curl -fsSL mayfly.live/preview.sh)</code>
       </div>
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
     </div>
@@ -773,7 +773,7 @@
 
   // ── Copy button ──
   function copyCode(btn) {
-    navigator.clipboard.writeText('bash <(curl -fsSL get.mayfly.live/preview.sh)').then(() => {
+    navigator.clipboard.writeText('bash <(curl -fsSL mayfly.live/preview.sh)').then(() => {
       btn.textContent = 'Copied!';
       btn.classList.add('copied');
       setTimeout(() => {

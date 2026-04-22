@@ -12,24 +12,24 @@ Auto-detects the project name from `.ddev/config.yaml`, the current git branch, 
 
 ```bash
 # deploy (default)
-bash <(curl -fsSL get.mayfly.live/preview.sh)
+bash <(curl -fsSL mayfly.live/preview.sh)
 
 # stop
-bash <(curl -fsSL get.mayfly.live/preview.sh) stop
+bash <(curl -fsSL mayfly.live/preview.sh) stop
 
 # import database
-cat dump.sql | bash <(curl -fsSL get.mayfly.live/preview.sh) import-db
-DB_FILE=dump.sql.gz bash <(curl -fsSL get.mayfly.live/preview.sh) import-db
+cat dump.sql | bash <(curl -fsSL mayfly.live/preview.sh) import-db
+DB_FILE=dump.sql.gz bash <(curl -fsSL mayfly.live/preview.sh) import-db
 
 # export database
-bash <(curl -fsSL get.mayfly.live/preview.sh) export-db > dump.sql
-DB_FILE=dump.sql bash <(curl -fsSL get.mayfly.live/preview.sh) export-db
+bash <(curl -fsSL mayfly.live/preview.sh) export-db > dump.sql
+DB_FILE=dump.sql bash <(curl -fsSL mayfly.live/preview.sh) export-db
 ```
 
 ### Save locally
 
 ```bash
-curl -fsSL get.mayfly.live/preview.sh -o preview.sh && chmod +x preview.sh
+curl -fsSL mayfly.live/preview.sh -o preview.sh && chmod +x preview.sh
 
 ./preview.sh deploy
 ./preview.sh stop
