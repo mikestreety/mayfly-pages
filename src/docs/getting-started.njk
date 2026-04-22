@@ -1,0 +1,64 @@
+---
+layout: docs.njk
+title: Getting Started — Mayfly Docs
+navSection: getting-started
+permalink: /docs/getting-started.html
+---
+
+<div class="content-inner">
+
+	<div class="page-meta">Getting Started</div>
+	<h1>Getting Started with Mayfly</h1>
+	<p class="lead">Mayfly gives you on-demand preview environments powered by ddev. Deploy a fresh copy of your site for every merge request, share the URL with your team, and let it disappear when you're done.</p>
+
+	<h2>Prerequisites</h2>
+	<ul>
+		<li><a href="https://ddev.readthedocs.io/en/stable/" target="_blank" rel="noopener">ddev</a> installed and configured on your local machine</li>
+		<li>An SSH key pair — Mayfly uses your public key for authentication</li>
+		<li>A Mayfly account (free during beta — <a href="https://join.slack.com/t/mayfly-corp/shared_invite/zt-3w2xcd6us-UKdVBMNkY~vv2bhSrLRSSA" target="_blank" rel="noopener">join via Slack</a>)</li>
+	</ul>
+
+	<h2>Installation</h2>
+	<p>Run the installer with a single command. It will set up the <code>mayfly</code> CLI and register your SSH key with your account.</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'bash &lt;(curl -fsSL get.mayfly.live/preview.sh)')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> bash &lt;(curl -fsSL get.mayfly.live/preview.sh)</code></pre>
+	</div>
+
+	<p>The installer will prompt you to paste your public SSH key if one has not been registered yet.</p>
+
+	<h2>Deploying your first environment</h2>
+	<p>Navigate to the root of any ddev-powered project and run:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'preview-deploy')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> preview-deploy</code></pre>
+	</div>
+
+	<p>Mayfly will spin up the environment under your account subdomain and print a shareable URL.</p>
+
+	<div class="callout callout-tip">
+		<strong>Tip:</strong> Each environment is named after your project and branch automatically. Run the same command on a different branch and you'll get a second, independent environment — both live at the same time.
+	</div>
+
+	<h2>Tearing down</h2>
+	<p>Environments are ephemeral by design, but you can destroy one manually:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this, 'preview-destroy')">Copy</button></div>
+		<pre><code><span class="c-prompt">$</span> preview-destroy</code></pre>
+	</div>
+
+	<h2>Next steps</h2>
+	<ul>
+		<li><a href="configuration.html">Customise your ddev environment</a></li>
+		<li><a href="ci-integration.html">Set up GitLab CI or GitHub Actions</a></li>
+	</ul>
+
+</div>
+
+<div class="page-nav">
+	<span></span>
+	<a href="configuration.html" class="page-nav-next">Configuration →</a>
+</div>

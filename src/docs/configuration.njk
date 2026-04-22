@@ -1,0 +1,61 @@
+---
+layout: docs.njk
+title: Configuration — Mayfly Docs
+navSection: configuration
+permalink: /docs/configuration.html
+---
+
+<div class="content-inner">
+
+	<div class="page-meta">Reference</div>
+	<h1>Configuration</h1>
+	<p class="lead">Mayfly reads your existing <code>.ddev/config.yaml</code> with no modifications required. Additional options let you customise how environments are named and what runs on deploy.</p>
+
+	<h2>How configuration works</h2>
+	<p>When you run <code>preview-deploy</code>, Mayfly packages your project's ddev configuration and sends it to the Mayfly host. Your existing <code>.ddev/</code> folder is used as-is — any PHP version, database, add-ons, or environment variables you have configured locally will apply to the preview environment too.</p>
+
+	<div class="callout">
+		<strong>Note:</strong> You do not need to change your <code>.ddev/config.yaml</code> to use Mayfly. Everything you already have configured will carry over.
+	</div>
+
+	<h2>Environment naming</h2>
+	<p>Each environment is identified by a slug derived from your project name and branch:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">text</span></div>
+		<pre><code>{your-username}.{project-name}-{branch-slug}.mayfly.live</code></pre>
+	</div>
+
+	<p>Branches with slashes (e.g. <code>feature/my-thing</code>) are normalised to hyphens automatically.</p>
+
+	<h2>Mayfly config file</h2>
+	<p>You can optionally add a <code>.mayfly.yml</code> file to your project root to control deploy behaviour:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">yaml</span><button class="copy-btn" onclick="copyCode(this, 'post_deploy:\n  - ddev exec &quot;wp search-replace localhost https://&quot;\nttl: 72h')">Copy</button></div>
+		<pre><code><span class="y-comment"># .mayfly.yml</span>
+<span class="y-key">post_deploy</span>:
+  - <span class="y-val">ddev exec "wp search-replace localhost https://"</span>
+<span class="y-key">ttl</span>: <span class="y-val">72h</span></code></pre>
+	</div>
+
+	<h3>Available options</h3>
+	<dl>
+		<dt>post_deploy</dt>
+		<dd>A list of shell commands to run inside the environment after it has started. Use this for database imports, search-replace operations, cache clears, etc.</dd>
+
+		<dt>ttl</dt>
+		<dd>How long the environment lives before being automatically destroyed. Accepts durations like <code>24h</code>, <code>72h</code>, <code>7d</code>. Defaults to <code>48h</code>.</dd>
+	</dl>
+
+	<h2>SSH keys</h2>
+	<p>Authentication is handled entirely via SSH keys. Mayfly does not use passwords. During initial setup, your public key is registered against your account. All environments you deploy are accessible only to holders of the corresponding private key.</p>
+
+	<p>To add a second key (e.g. for a CI runner), contact us via Slack.</p>
+
+</div>
+
+<div class="page-nav">
+	<a href="getting-started.html" class="page-nav-prev">← Getting Started</a>
+	<a href="ci-integration.html" class="page-nav-next">CI Integration →</a>
+</div>

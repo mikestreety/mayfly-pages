@@ -1,0 +1,79 @@
+---
+layout: docs.njk
+title: CI Integration — Mayfly Docs
+navSection: ci-integration
+permalink: /docs/ci-integration.html
+---
+
+<div class="content-inner">
+
+	<div class="page-meta">Reference</div>
+	<h1>CI Integration</h1>
+	<p class="lead">Automatically deploy a preview environment for every merge request. Mayfly provides a purpose-built Docker image that makes CI setup a single job.</p>
+
+	<h2>GitLab CI</h2>
+	<p>Add the following job to your <code>.gitlab-ci.yml</code>. The <code>ghcr.io/mikestreety/ddev-hosted</code> image contains ddev and the Mayfly CLI pre-installed.</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">.gitlab-ci.yml</span><button class="copy-btn" onclick="copyCode(this, 'deploy:preview:\n  stage: deploy\n  image: ghcr.io/mikestreety/ddev-hosted:latest\n  script:\n    - preview-deploy')">Copy</button></div>
+		<pre><code><span class="y-key">deploy</span>:<span class="y-key">preview</span>:
+  <span class="y-key">stage</span>: <span class="y-val">deploy</span>
+  <span class="y-key">image</span>: <span class="y-val">ghcr.io/mikestreety/ddev-hosted:latest</span>
+  <span class="y-key">script</span>:
+    - <span class="y-val">preview-deploy</span></code></pre>
+	</div>
+
+	<p>The job will deploy on every push. To limit it to merge requests only, add a <code>rules</code> block:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">.gitlab-ci.yml</span><button class="copy-btn" onclick="copyCode(this, 'deploy:preview:\n  stage: deploy\n  image: ghcr.io/mikestreety/ddev-hosted:latest\n  rules:\n    - if: $CI_MERGE_REQUEST_ID\n  script:\n    - preview-deploy')">Copy</button></div>
+		<pre><code><span class="y-key">deploy</span>:<span class="y-key">preview</span>:
+  <span class="y-key">stage</span>: <span class="y-val">deploy</span>
+  <span class="y-key">image</span>: <span class="y-val">ghcr.io/mikestreety/ddev-hosted:latest</span>
+  <span class="y-key">rules</span>:
+    - <span class="y-key">if</span>: <span class="y-val">$CI_MERGE_REQUEST_ID</span>
+  <span class="y-key">script</span>:
+    - <span class="y-val">preview-deploy</span></code></pre>
+	</div>
+
+	<h2>GitHub Actions</h2>
+	<p>For GitHub Actions, use the same Docker image as your job container:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">.github/workflows/preview.yml</span><button class="copy-btn" onclick="copyCode(this, 'name: Deploy Preview\non:\n  pull_request:\njobs:\n  preview:\n    runs-on: ubuntu-latest\n    container:\n      image: ghcr.io/mikestreety/ddev-hosted:latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: preview-deploy')">Copy</button></div>
+		<pre><code><span class="y-key">name</span>: <span class="y-val">Deploy Preview</span>
+<span class="y-key">on</span>:
+  <span class="y-val">pull_request</span>:
+<span class="y-key">jobs</span>:
+  <span class="y-key">preview</span>:
+    <span class="y-key">runs-on</span>: <span class="y-val">ubuntu-latest</span>
+    <span class="y-key">container</span>:
+      <span class="y-key">image</span>: <span class="y-val">ghcr.io/mikestreety/ddev-hosted:latest</span>
+    <span class="y-key">steps</span>:
+      - <span class="y-key">uses</span>: <span class="y-val">actions/checkout@v4</span>
+      - <span class="y-key">run</span>: <span class="y-val">preview-deploy</span></code></pre>
+	</div>
+
+	<h2>SSH key in CI</h2>
+	<p>Your CI runner needs access to your Mayfly SSH private key. Store it as a masked CI/CD variable and pass it through to the job:</p>
+
+	<div class="code-block">
+		<div class="code-header"><span class="code-lang">GitLab CI</span></div>
+		<pre><code><span class="y-key">before_script</span>:
+  - <span class="y-val">eval $(ssh-agent -s)</span>
+  - <span class="y-val">echo "$MAYFLY_SSH_KEY" | ssh-add -</span></code></pre>
+	</div>
+
+	<div class="callout">
+		<strong>Security:</strong> Store your private key as a masked, protected variable. Never commit it to your repository.
+	</div>
+
+	<h2>Environment URLs</h2>
+	<p>After a successful deploy, <code>preview-deploy</code> prints the environment URL to stdout. You can capture it and post it as a merge request comment using your CI platform's API.</p>
+
+</div>
+
+<div class="page-nav">
+	<a href="configuration.html" class="page-nav-prev">← Configuration</a>
+	<span></span>
+</div>

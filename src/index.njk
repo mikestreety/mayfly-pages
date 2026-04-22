@@ -1,0 +1,147 @@
+---
+layout: base.njk
+title: Mayfly — Ephemeral Preview Environments
+cssFile: /assets/css/landing.css
+---
+
+<canvas id="stars-canvas"></canvas>
+
+<div class="page-wrap">
+
+	<header>
+		<a class="logo-lockup" href="#">
+			<span class="logo-mark">{% include "partials/logo.njk" %}</span>
+			<span class="logo-wordmark">mayfly</span>
+			<span class="beta-chip">beta</span>
+		</a>
+		<nav>
+			<a href="/docs/getting-started.html">Documentation</a>
+		</nav>
+	</header>
+
+	<main class="hero">
+		<div class="hero-glow"></div>
+
+		<div class="hero-fly">{% include "partials/logo.njk" %}</div>
+
+		<h1 class="hero-headline">
+			Zero-config <em>ephemeral</em> preview&nbsp;environments powered by ddev.
+		</h1>
+
+		<div class="code-wrap">
+			<div class="code-block">
+				<span class="prompt">$</span><code>bash &lt;(curl -fsSL mayfly.live/preview.sh)</code>
+			</div>
+			<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+		</div>
+
+		<a class="cta-btn" href="https://join.slack.com/t/mayfly-corp/shared_invite/zt-3w2xcd6us-UKdVBMNkY~vv2bhSrLRSSA" target="_blank" rel="noopener">
+			<svg class="slack-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#0d0621"/>
+			</svg>
+			Join the beta on Slack
+		</a>
+		<p class="cta-note">Free to join · Early access</p>
+	</main>
+
+	<section class="benefits">
+		<div class="benefit">
+			<svg class="benefit-icon" viewBox="0 0 32 32" fill="none">
+				<rect x="3" y="7" width="26" height="18" rx="3" stroke="var(--accent)" stroke-width="1.5"/>
+				<path d="M9 16l4 4 10-8" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>
+			<div class="benefit-title">One command away</div>
+			<div class="benefit-desc">Spin up a fully configured preview environment with a single line. No YAML, no manual setup.</div>
+		</div>
+		<div class="benefit">
+			<svg class="benefit-icon" viewBox="0 0 32 32" fill="none">
+				<circle cx="16" cy="16" r="12" stroke="var(--accent)" stroke-width="1.5"/>
+				<path d="M16 4v4M16 24v4M4 16h4M24 16h4" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+				<circle cx="16" cy="16" r="4" stroke="var(--accent)" stroke-width="1.5"/>
+			</svg>
+			<div class="benefit-title">CI or local — your choice</div>
+			<div class="benefit-desc">Integrates with GitHub Actions and GitLab CI pipelines, or run it straight from your terminal.</div>
+		</div>
+		<div class="benefit">
+			<svg class="benefit-icon" viewBox="0 0 32 32" fill="none">
+				<path d="M6 26l4-4M22 10l4-4" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+				<path d="M10 6h6a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10H10a4 4 0 0 1-4-4v-12a4 4 0 0 1 4-4z" stroke="var(--accent)" stroke-width="1.5"/>
+				<path d="M12 16h8" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round"/>
+			</svg>
+			<div class="benefit-title">Gone when you're done</div>
+			<div class="benefit-desc">Environments are ephemeral by design — spun up fast, torn down clean. No lingering infrastructure.</div>
+		</div>
+	</section>
+
+	<section class="how-it-works">
+		<div class="section-inner">
+			<h2 class="section-label">How it works</h2>
+			<div class="steps">
+				<div class="step">
+					<span class="step-num">01</span>
+					<div class="step-body">
+						<div class="step-title">Register with your SSH key</div>
+						<div class="step-desc">Sign up for an account. Add your SSH key and every environment you deploy lives under your own named subdomain.</div>
+					</div>
+				</div>
+				<div class="step-divider"></div>
+				<div class="step">
+					<span class="step-num">02</span>
+					<div class="step-body">
+						<div class="step-title">Deploy from CI or locally</div>
+						<div class="step-desc">Trigger a deploy from your merge request pipeline or run the command directly. Mayfly reads your existing ddev config — no extra setup.</div>
+					</div>
+				</div>
+				<div class="step-divider"></div>
+				<div class="step">
+					<span class="step-num">03</span>
+					<div class="step-body">
+						<div class="step-title">Share the URL</div>
+						<div class="step-desc">Each environment gets its own URL. Run as many simultaneous previews as you need — one per branch, one per reviewer.</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="ci-section">
+		<div class="ci-inner">
+			<div class="ci-text">
+				<h2 class="section-label">Built for merge request previews</h2>
+				<p class="ci-desc">Drop a single job into your GitLab CI pipeline. Mayfly handles the rest — spinning up a ddev environment, deploying your branch, and handing back a shareable URL. GitHub Actions support included.</p>
+			</div>
+			<div class="ci-code-wrap">
+				<div class="ci-code-header">
+					<span class="ci-filename">.gitlab-ci.yml</span>
+				</div>
+				<pre class="ci-code"><span class="ci-key">deploy</span><span class="ci-punct">:</span><span class="ci-key">preview</span><span class="ci-punct">:</span>
+  <span class="ci-key">stage</span><span class="ci-punct">:</span> <span class="ci-val">deploy</span>
+  <span class="ci-key">image</span><span class="ci-punct">:</span> <span class="ci-val">ghcr.io/mikestreety/ddev-hosted:latest</span>
+  <span class="ci-key">script</span><span class="ci-punct">:</span>
+    <span class="ci-punct">-</span> <span class="ci-val">preview-deploy</span></pre>
+			</div>
+		</div>
+	</section>
+
+	<section class="stacks-section">
+		<p class="stacks-label">Works with any ddev-powered project</p>
+		<div class="stacks">
+			<span class="stack-badge">WordPress</span>
+			<span class="stack-badge">Drupal</span>
+			<span class="stack-badge">TYPO3</span>
+			<span class="stack-badge">Craft CMS</span>
+			<span class="stack-badge">Laravel</span>
+			<span class="stack-badge">Symfony</span>
+			<span class="stack-badge">Magento</span>
+			<span class="stack-badge">+ any ddev project</span>
+		</div>
+	</section>
+
+	<footer>
+		<span>© 2026 Mayfly</span>
+		<span>Built by <a href="https://www.mikestreety.co.uk/" target="_blank" rel="noopener">Mike Street</a></span>
+	</footer>
+
+</div>
+
+<script src="/assets/js/landing.js"></script>

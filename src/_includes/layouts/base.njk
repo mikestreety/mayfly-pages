@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"{% if dataTheme %} data-theme="{{ dataTheme }}"{% endif %}>
+<head>
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link rel="shortcut icon" href="/assets/favicon.ico" type="image/vnd.microsoft.icon">
+	<link rel="icon" href="/assets/favicon.ico" sizes="any">
+	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+	<link rel="apple-touch-icon" href="/assets/favicon_180.png">
+	<title>{{ title }}</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com"/>
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+	{% if cssFile %}<link rel="stylesheet" href="{{ cssFile }}"/>{% endif %}
+	{% if hasThemeToggle %}
+	<script>
+	(function() {
+		var saved = localStorage.getItem('mayfly-docs-theme') || 'dark';
+		document.documentElement.setAttribute('data-theme', saved);
+	})();
+	</script>
+	{% endif %}
+</head>
+<body>
+	{{ content | safe }}
+</body>
+</html>
