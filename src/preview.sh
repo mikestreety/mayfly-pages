@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# preview.sh — run ddev-hosted CI scripts locally
+# preview.sh — run mayfly CI scripts locally
 #
 # Run from your TYPO3 project root (the directory containing .ddev/).
 #
@@ -35,7 +35,7 @@
 set -euo pipefail
 
 COMMAND=${1:-deploy}
-IMAGE="ghcr.io/mikestreety/ddev-hosted:latest"
+IMAGE="ghcr.io/mikestreety/mayfly:latest"
 
 # ── validate and normalise command ───────────────────────────────────────────
 case "$COMMAND" in
