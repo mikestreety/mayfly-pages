@@ -140,6 +140,14 @@ nav a:hover { color: var(--text); }
 	color: var(--accent);
 }
 
+.hero-divider {
+	width: 100%;
+	max-width: 640px;
+	border: none;
+	border-top: 1px solid var(--border);
+	margin: 20px 0;
+}
+
 .hero-tagline {
 	font-size: clamp(16px, 2vw, 20px);
 	line-height: 1.6;
