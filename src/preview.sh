@@ -5,7 +5,7 @@
 # Run from your project root (the directory containing .ddev/).
 #
 # Usage:
-#   preview.sh [deploy|delete|stop|import-db|export-db]
+#   preview.sh [deploy|delete|stop|import-db|export-db] [<slug>]
 #
 #   deploy      — rsync and configure the preview environment
 #   delete      — tear down the preview environment (aliases: teardown)
@@ -18,6 +18,12 @@
 #   export-db   — dump the preview database to stdout (or DB_FILE)
 #                   preview.sh export-db > database.sql
 #                   DB_FILE=database.sql preview.sh export-db
+#
+#   <slug>      — optional preview slug (e.g. myproject-abc123); skips
+#                   auto-detection of project name and branch. Useful when
+#                   running outside the project directory or off the branch.
+#                   Not supported with 'deploy'.
+#                   e.g.: preview.sh stop myproject-abc123
 #
 # Auto-detects:
 #   - Project name    from .ddev/config.yaml
@@ -35,13 +41,14 @@
 set -euo pipefail
 
 COMMAND=${1:-deploy}
+SLUG_OVERRIDE=${2:-}
 IMAGE="ghcr.io/mayfly-live/mayfly:latest"
 
 # ── validate and normalise command ───────────────────────────────────────────
 case "$COMMAND" in
   deploy|delete|teardown|stop|shutdown|import-db|export-db) ;;
   *)
-    echo "Usage: $0 [deploy|delete|stop|import-db|export-db]" >&2
+    echo "Usage: $0 [deploy|delete|stop|import-db|export-db] [<slug>]" >&2
     exit 1
     ;;
 esac
@@ -50,27 +57,36 @@ case "$COMMAND" in
   shutdown) COMMAND=stop ;;
 esac
 
+if [ -n "$SLUG_OVERRIDE" ] && [ "$COMMAND" = "deploy" ]; then
+  echo "Error: slug override is not supported with 'deploy'" >&2
+  exit 1
+fi
+
 # ── server config ────────────────────────────────────────────────────────────
 PREVIEW_SERVER_HOST=${PREVIEW_SERVER_HOST:-host.mayfly.live}
 PREVIEW_SERVER_USER=${PREVIEW_SERVER_USER:-deploy}
 PREVIEW_DOMAIN=${PREVIEW_DOMAIN:-mayfly.live}
 
-# ── project name from .ddev/config.yaml ──────────────────────────────────────
-if [ ! -f ".ddev/config.yaml" ]; then
-  echo "Error: .ddev/config.yaml not found — run from your project root" >&2
-  exit 1
-fi
-CI_PROJECT_NAME=$(grep '^name:' .ddev/config.yaml | awk '{print $2}')
-if [ -z "$CI_PROJECT_NAME" ]; then
-  echo "Error: could not read 'name:' from .ddev/config.yaml" >&2
-  exit 1
-fi
+# ── project name and branch ──────────────────────────────────────────────────
+# Skipped when a slug is passed directly (non-deploy commands only).
+CI_PROJECT_NAME=""
+CI_COMMIT_REF_NAME=""
+if [ -z "$SLUG_OVERRIDE" ]; then
+  if [ ! -f ".ddev/config.yaml" ]; then
+    echo "Error: .ddev/config.yaml not found — run from your project root" >&2
+    exit 1
+  fi
+  CI_PROJECT_NAME=$(grep '^name:' .ddev/config.yaml | awk '{print $2}')
+  if [ -z "$CI_PROJECT_NAME" ]; then
+    echo "Error: could not read 'name:' from .ddev/config.yaml" >&2
+    exit 1
+  fi
 
-# ── git branch ───────────────────────────────────────────────────────────────
-CI_COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-if [ -z "$CI_COMMIT_REF_NAME" ]; then
-  echo "Error: could not determine current git branch" >&2
-  exit 1
+  CI_COMMIT_REF_NAME=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)
+  if [ -z "$CI_COMMIT_REF_NAME" ]; then
+    echo "Error: could not determine current git branch" >&2
+    exit 1
+  fi
 fi
 
 # ── SSH key ──────────────────────────────────────────────────────────────────
@@ -105,8 +121,12 @@ if ! ssh-keygen -y -P "" -f "$SSH_KEY_FILE" &>/dev/null; then
 fi
 
 echo "[preview] Command: ${COMMAND}"
-echo "[preview] Project: ${CI_PROJECT_NAME}"
-echo "[preview] Branch: ${CI_COMMIT_REF_NAME}"
+if [ -n "$SLUG_OVERRIDE" ]; then
+  echo "[preview] Slug:    ${SLUG_OVERRIDE}"
+else
+  echo "[preview] Project: ${CI_PROJECT_NAME}"
+  echo "[preview] Branch:  ${CI_COMMIT_REF_NAME}"
+fi
 echo "[preview] SSH key: ${SSH_KEY_FILE}"
 
 # ── import-db: normalise input to a plain-SQL file in the workspace ──────────
@@ -162,6 +182,7 @@ DOCKER_ARGS=(
   -e "CI_PROJECT_NAME=${CI_PROJECT_NAME}"
   -e "CI_COMMIT_REF_NAME=${CI_COMMIT_REF_NAME}"
 )
+[ -n "$SLUG_OVERRIDE" ] && DOCKER_ARGS+=(-e "PREVIEW_SLUG=${SLUG_OVERRIDE}")
 [ -n "$IMPORT_TMP" ] && DOCKER_ARGS+=(-e "DB_FILE=${IMPORT_TMP}")
 
 if [ "$COMMAND" = "export-db" ] && [ -n "${DB_FILE:-}" ]; then
