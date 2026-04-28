@@ -140,6 +140,19 @@ nav a:hover { color: var(--text); }
 	color: var(--accent);
 }
 
+.hero-tagline {
+	font-size: clamp(16px, 2vw, 20px);
+	line-height: 1.6;
+	color: var(--text-muted);
+	max-width: 640px;
+	margin-bottom: 40px;
+}
+
+.hero-tagline strong {
+	color: var(--text);
+	font-weight: 700;
+}
+
 /* Code block */
 .code-wrap {
 	position: relative;
